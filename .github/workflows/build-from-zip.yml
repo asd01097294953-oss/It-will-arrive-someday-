@@ -1,0 +1,46 @@
+
+name: Build APK from ZIP
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'NaturalSeupjjo_Complete_Project.zip'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 저장소 가져오기
+        uses: actions/checkout@v4
+
+      - name: ZIP 압축 풀기
+        run: |
+          unzip -o NaturalSeupjjo_Complete_Project.zip -d project
+          find project -name settings.gradle -o -name settings.gradle.kts
+
+      - name: Java 설치
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Gradle 설치
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: APK 빌드
+        run: |
+          cd project
+          gradle assembleDebug
+
+      - name: APK 업로드
+        uses: actions/upload-artifact@v4
+        with:
+          name: NaturalSeupjjo-APK
+          path: project/app/build/outputs/apk/debug/app-debug.apk
